@@ -1,11 +1,12 @@
 import argparse
 from pathlib import Path
 
+# from scripts.model import Connection
 from model import Connection
 # import dags.scripts.config as config
-import sys
-sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/')
-import scripts.config as config
+# import sys
+# sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/')
+import config as config
 
 from sqlalchemy import create_engine,text
 import os

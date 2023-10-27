@@ -1,4 +1,4 @@
-import config
+from config import DB_CONNECTION_STRING_WAREHOUSE
 import uuid
 
 from sqlalchemy.orm import sessionmaker
@@ -12,7 +12,7 @@ class Connection(object):
         if engine is not None:
             self.engine = engine
         else:
-            self.engine = create_engine(config.DB_CONNECTION_STRING_WAREHOUSE)
+            self.engine = create_engine(DB_CONNECTION_STRING_WAREHOUSE)
 
     def get_session(self):
         Session = sessionmaker(bind=self.engine)
@@ -27,7 +27,7 @@ Base = declarative_base()
 
 
 def init_db():
-    engine = create_engine(config.DB_CONNECTION_STRING_WAREHOUSE)
+    engine = create_engine(DB_CONNECTION_STRING_WAREHOUSE)
     Base.metadata.create_all(bind=engine)
 
 class Users(Base):

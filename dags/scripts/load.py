@@ -1,11 +1,12 @@
 import os
 import csv
 
-from model import Connection, Users, Locations, Additional
+from scripts.model import Connection, Users, Locations, Additional
 # import dags.scripts.config as config
-import sys
-sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/')
-import scripts.config as config
+# import sys
+# sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/')
+# import scripts.config as config
+from scripts.config import DB_CONNECTION_STRING_WAREHOUSE 
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -49,7 +50,7 @@ def main():
     # commit db
     # close db
     # write your code here
-    engine = create_engine(config.DB_CONNECTION_STRING_WAREHOUSE)
+    engine = create_engine(DB_CONNECTION_STRING_WAREHOUSE)
     Session = sessionmaker(bind=engine)
     session = Session()
 

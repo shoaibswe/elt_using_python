@@ -1,5 +1,5 @@
 import requests
-import config
+from scripts import config
 import multiprocessing
 import os
 import pandas as pd
