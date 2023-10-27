@@ -45,6 +45,7 @@ def import_data():
     pool= multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
     def generate_seeds():
+        nonlocal seed
         for _ in range(num_requests):
             yield seed
             seed = next_seed(seed)
@@ -52,7 +53,7 @@ def import_data():
     results = pool.map(get_data,generate_seeds())
 
     pool.close()
-    pool.json()
+    pool.join()
 
     return results
     # pass
@@ -74,7 +75,7 @@ def transform_data(data_json):
     # do any required pre-processing such as
     # fill-in or remove garbadge value if any
     # return data frame
-    if data_json:
+    if data_json is not None:
         df = pd.DataFrame(data_json)
         return df
     else:
