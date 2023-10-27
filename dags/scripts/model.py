@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import create_engine, Column, String
+from sqlalchemy import create_engine, Column, String, text
 
 
 class Connection(object):

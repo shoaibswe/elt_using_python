@@ -12,16 +12,23 @@ def next_seed(seed):
     # create next permutation from given SEED above
     # order is importent
     # repetittion not allowed
-    seed_list = list((set(seed)))
+    # seed_list = list((set(seed)))
+    seed_list = list(map(str, set(seed)))  
+
     permutations =  list(itertools.permutations(seed_list))
     current_index= permutations.index(tuple(seed_list))
     next_index= (current_index+1)%len(permutations)
     next_permutation = list(permutations[next_index])
 
-    next_seed = seed.copy()
+    # next_seed = seed.copy()
+    # for x in range(len(seed)):
+    #     next_seed[x] = next_permutation[x]
+    # return next_seed
+    next_seed_list = list(seed)
     for x in range(len(seed)):
-        next_seed[x] = next_permutation[x]
-    return next_seed
+        next_seed_list[x] = next_permutation[x]
+    
+    return ''.join(next_seed_list)    
     # pass
 
 
@@ -70,15 +77,48 @@ def get_file_path():
     return filepath
 
 
+def flatten_dict(d, parent_key='', sep='_'):
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
 def transform_data(data_json):
     # create a pandas data frame
     # do any required pre-processing such as
     # fill-in or remove garbadge value if any
     # return data frame
-    if data_json is not None:
-        df = pd.DataFrame(data_json)
-        return df
+    if data_json is not None and isinstance(data_json, list) and len(data_json) > 0:
+        # def convert_lists_to_str(data_dict):
+        #     for key, value in data_dict.items():
+        #         if isinstance(value, list):
+        #             data_dict[key] = str(value)
+        #     return data_dict            
+
+        # # valid_data = [item for item in data_json if item is not None]
+        # valid_data = [convert_lists_to_str(item) for item in data_json if item is not None]
+        flattened_data = [flatten_dict(item) for item in data_json if item is not None]
+
+        if len(flattened_data) > 0:
+            for item in flattened_data:
+                for key, value in item.items():
+                    if isinstance(value, list):
+                        item[key] = ', '.join(map(str, value))
+
+            keys = flattened_data[0].keys()
+            df = pd.DataFrame(flattened_data, columns=keys)
+            df = df.dropna()
+            df = df.drop_duplicates()
+            return df
+
+        # df = pd.DataFrame(data_json)
+        # return df
     else:
+        print("No valid data to Transform")
         return None
     # pass
 
