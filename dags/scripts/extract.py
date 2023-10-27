@@ -49,7 +49,7 @@ def import_data():
     # to generate next seed and then make parallal get api request and fetch single user data.
     # a total of 10000 api call need to be made
     # no api call should have same seed value.
-    num_requests= 10000
+    num_requests= 10
     seed = [0]
     pool= multiprocessing.Pool(processes=multiprocessing.cpu_count())
 

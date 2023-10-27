@@ -7,7 +7,8 @@ import uuid
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import create_engine, Column, String, text
+from sqlalchemy import create_engine, Column, String, text, TIMESTAMP, create_engine, ForeignKey
+from sqlalchemy.orm import declarative_base
 
 
 class Connection(object):
@@ -64,6 +65,8 @@ class Locations(Base):
     country = Column(String)
     postcode = Column(String)
     country_code = Column(String) 
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    created_at = Column(TIMESTAMP, server_default='now()')
 
     def __init__(self, city, state, country, postcode, country_code):
         # init database model
@@ -83,6 +86,8 @@ class Additional(Base):
     phone = Column(String)
     email = Column(String)
     picture_large = Column(String) 
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    created_at = Column(TIMESTAMP, server_default='now()')
 
     def __init__(self, phone,email, picture_large):
         # init database model

@@ -24,8 +24,7 @@ def init_db():
     engine= create_engine(config.DB_CONNECTION_STRING_WAREHOUSE)
     # get db session
     
-    # connection= Connection(engine) 
-    # session = connection.session()
+    
     # create a schema named raw
     # script_dir = os.path.dirname(os.path.abspath(__file__))
     # schema_file_path = os.path.abspath(os.path.join(script_dir,'..','..','scripts','schema.sql'))
