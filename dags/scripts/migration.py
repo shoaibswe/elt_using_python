@@ -1,8 +1,12 @@
+import sys
+sys.path.insert(0,'/opt/airflow/dags/scripts/')
+# sys.path.insert(0,'/opt/airflow/scripts/')
+
 import argparse
 from pathlib import Path
 
-# from scripts.model import Connection
 from model import Connection
+# from model import Connection
 # import dags.scripts.config as config
 # import sys
 # sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/')
@@ -23,13 +27,14 @@ def init_db():
     # connection= Connection(engine) 
     # session = connection.session()
     # create a schema named raw
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    schema_file_path = os.path.abspath(os.path.join(script_dir,'..','..','scripts','schema.sql'))
-    table_file_path = os.path.abspath(os.path.join(script_dir,'..','..','scripts','table.sql'))
-   
-    print("Script Dir is: ",script_dir)
-    print(schema_file_path)
-    print(table_file_path)
+    # script_dir = os.path.dirname(os.path.abspath(__file__))
+    # schema_file_path = os.path.abspath(os.path.join(script_dir,'..','..','scripts','schema.sql'))
+    # table_file_path = os.path.abspath(os.path.join(script_dir,'..','..','scripts','table.sql'))
+    schema_file_path = '/opt/airflow/scripts/schema.sql'
+    table_file_path = '/opt/airflow/scripts/table.sql'
+    # print("Script Dir is: ",script_dir)
+    # print(schema_file_path)
+    # print(table_file_path)
     connection = Connection(engine)
     session = connection.get_session()
 

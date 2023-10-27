@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0,'/opt/airflow/dags/scripts/')
+
 from config import DB_CONNECTION_STRING_WAREHOUSE
 import uuid
 

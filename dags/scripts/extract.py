@@ -1,5 +1,7 @@
+import sys
+sys.path.insert(0,'/opt/airflow/dags/scripts')
 import requests
-from scripts import config
+import config
 import multiprocessing
 import os
 import pandas as pd
