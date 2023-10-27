@@ -37,13 +37,23 @@ def init_db():
     connection = Connection(engine)
     session = connection.get_session()
 
-    with open(schema_file_path,'r') as schema_file:
+    with open(schema_file_path, 'r') as schema_file:
         schema_commands = text(schema_file.read())
-        session.execute(schema_commands)
+        try:
+            session.execute(schema_commands)
+            session.commit()
+        except Exception as e:
+            print(f"Error executing schema SQL: {e}")
+            session.rollback()
 
-    with open(table_file_path,'r') as table_file:
+    with open(table_file_path, 'r') as table_file:
         tbl_commands = text(table_file.read())
-        session.execute(tbl_commands)
+        try:
+            session.execute(tbl_commands)
+            session.commit()
+        except Exception as e:
+            print(f"Error executing table SQL: {e}")
+            session.rollback()
     
     # create users, locations, additional table in schema raw with appropiate columns
     # commit db

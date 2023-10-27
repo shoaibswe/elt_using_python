@@ -36,6 +36,7 @@ def init_db():
 
 class Users(Base):
     __tablename__ = 'users'
+    __table_args__ = {'schema': 'raw'} 
 
 	# define required database columes
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -57,6 +58,7 @@ class Users(Base):
 
 class Locations(Base):
     __tablename__ = 'locations'
+    __table_args__ = {'schema': 'raw'} 
 
 	# define required database columes
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -65,7 +67,7 @@ class Locations(Base):
     country = Column(String)
     postcode = Column(String)
     country_code = Column(String) 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey('raw.users.id'))
     created_at = Column(TIMESTAMP, server_default='now()')
 
     def __init__(self, city, state, country, postcode, country_code):
@@ -80,13 +82,14 @@ class Locations(Base):
 
 class Additional(Base):
     __tablename__ = 'additional'
+    __table_args__ = {'schema': 'raw'} 
 
 	# define required database columes
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     phone = Column(String)
     email = Column(String)
     picture_large = Column(String) 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    user_id = Column(UUID(as_uuid=True), ForeignKey('raw.users.id'))
     created_at = Column(TIMESTAMP, server_default='now()')
 
     def __init__(self, phone,email, picture_large):

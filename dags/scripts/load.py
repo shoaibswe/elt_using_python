@@ -64,11 +64,11 @@ def main():
             additional_data = extract_data_from_json(info_results_json)
             user = Users(
                 gender=user_data.get('gender', None),
-                name=user_data['name'].get('title', None),
-                first=user_data['name'].get('first', None),
-                last=user_data['name'].get('last', None),
-                date_of_birth=user_data.get('dob', None)
-            )
+                name=user_data.get('name', {}).get('title', None),
+                first=user_data.get('name', {}).get('first', None),
+                last=user_data.get('name', {}).get('last', None),
+                date_of_birth=user_data.get('dob', {}).get('date', None)             
+                )
             data_insert_users.append(user)
 
             if 'location' in location_data:
