@@ -1,0 +1,8 @@
+airflow-db
+warehouse_data
+pgadmin_data
+metabase
+.mypy_cache
+plugins
+__pycache__
+logs/*
