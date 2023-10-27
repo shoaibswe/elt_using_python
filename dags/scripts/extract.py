@@ -3,6 +3,7 @@ import config
 import multiprocessing
 import os
 import pandas as pd
+import itertools
 
 API_URL= config.API_URL
 FILENAME = "random_user.csv"
@@ -11,7 +12,17 @@ def next_seed(seed):
     # create next permutation from given SEED above
     # order is importent
     # repetittion not allowed
-    pass
+    seed_list = list((set(seed)))
+    permutations =  list(itertools.permutations(seed_list))
+    current_index= permutations.index(tuple(seed_list))
+    next_index= (current_index+1)%len(permutations)
+    next_permutation = list(permutations[next_index])
+
+    next_seed = seed.copy()
+    for x in range(len(seed)):
+        next_seed[x] = next_permutation[x]
+    return next_seed
+    # pass
 
 
 def get_data(seed):
@@ -30,20 +41,21 @@ def import_data():
     # a total of 10000 api call need to be made
     # no api call should have same seed value.
     num_requests= 10000
-    seed = 0
+    seed = [0]
+    pool= multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
     def generate_seeds():
-        while seed<num_requests:
+        for _ in range(num_requests):
             yield seed
-            seed +=1
+            seed = next_seed(seed)
 
-    pool= multiprocessing.Pool(processes=multiprocessing.cpu_count())
     results = pool.map(get_data,generate_seeds())
 
     pool.close()
     pool.json()
-    # pass
+
     return results
+    # pass
 
 
 
@@ -88,3 +100,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+#Installed pandas lib
