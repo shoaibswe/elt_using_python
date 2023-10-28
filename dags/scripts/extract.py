@@ -37,6 +37,8 @@ def next_seed(seed):
 def get_data(seed):
     # fetch data from API_URL defined in config and return the json data
     respose = requests.get(f"{API_URL}/{seed}")
+    # print("response is : ", respose)
+    # print("json data is : ", respose.json())
     if respose.status_code==200:
         return respose.json()
     else:
@@ -49,9 +51,9 @@ def import_data():
     # to generate next seed and then make parallal get api request and fetch single user data.
     # a total of 10000 api call need to be made
     # no api call should have same seed value.
-    num_requests= 10
+    num_requests= 100
     seed = [0]
-    pool= multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
     def generate_seeds():
         nonlocal seed
@@ -59,7 +61,7 @@ def import_data():
             yield seed
             seed = next_seed(seed)
 
-    results = pool.map(get_data,generate_seeds())
+    results = pool.map(get_data, generate_seeds())
 
     pool.close()
     pool.join()
@@ -79,50 +81,56 @@ def get_file_path():
     return filepath
 
 
-def flatten_dict(d, parent_key='', sep='_'):
-    items = []
-    for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
-
 def transform_data(data_json):
+    user_data_list = []
+
     # create a pandas data frame
     # do any required pre-processing such as
     # fill-in or remove garbadge value if any
     # return data frame
-    if data_json is not None and isinstance(data_json, list) and len(data_json) > 0:
-        # def convert_lists_to_str(data_dict):
-        #     for key, value in data_dict.items():
-        #         if isinstance(value, list):
-        #             data_dict[key] = str(value)
-        #     return data_dict            
+    for dt in data_json:
+        if dt is not None and 'results' in dt:
+            results = dt['results']
+            if isinstance(results, list) and len(results) > 0:
+                user_data = results[0]
+                gender = user_data['gender']
+                first_name = user_data['name']['first']
+                last_name = user_data['name']['last']
+                dob = user_data['dob']['date']
+                city = user_data['location']['city']
+                state = user_data['location']['state']
+                country = user_data['location']['country']
+                postcode = user_data['location']['postcode']
+                nat = user_data['nat']
+                phone = user_data['phone']
+                email = user_data['email']
+                picture_large = user_data['picture']['large']
+                user_data_dict = {
+                    'Gender': gender,
+                    'First Name': first_name,
+                    'Last Name': last_name,
+                    'Date of Birth': dob,
+                    'City': city,
+                    'State': state,
+                    'Country': country,
+                    'Postcode': postcode,
+                    'Country Code (nat)': nat,
+                    'Phone': phone,
+                    'Email': email,
+                    'Picture Large': picture_large
+                }  
+                user_data_list.append(user_data_dict)
 
-        # # valid_data = [item for item in data_json if item is not None]
-        # valid_data = [convert_lists_to_str(item) for item in data_json if item is not None]
-        flattened_data = [flatten_dict(item) for item in data_json if item is not None]
-
-        if len(flattened_data) > 0:
-            for item in flattened_data:
-                for key, value in item.items():
-                    if isinstance(value, list):
-                        item[key] = ', '.join(map(str, value))
-
-            keys = flattened_data[0].keys()
-            df = pd.DataFrame(flattened_data, columns=keys)
-            df = df.dropna()
-            df = df.drop_duplicates()
-            return df
-
-        # df = pd.DataFrame(data_json)
-        # return df
-    else:
-        print("No valid data to Transform")
-        return None
-    # pass
+                if user_data_list:
+                    data_df = pd.DataFrame(user_data_list)
+                    return data_df             
+                # df = df.dropna()
+                # df = df.drop_duplicates()
+                # data_frames.append(df)
+                else:
+                    print("No valid data to transform")
+                    return None
+        # pass
 
 
 def save_new_data_to_csv(data):

@@ -27,7 +27,7 @@ def preprocess_json(json_str):
     last_closing_brace = json_str.rfind('}')
     if last_closing_brace != -1:
         json_str = json_str[:last_closing_brace + 1]
-    json_str = json_str.replace("'", "\"")
+    json_str = json_str.replace("{}/[0],1,1,1.4", "")
     return json_str
 
 def extract_data_from_json(json_str):
@@ -55,13 +55,19 @@ def main():
         csv_reader = csv.DictReader(csvf)
 
         for row in csv_reader:
+            # results_json = preprocess_json(row.get('results', '{}'))
+            # info_seed_json = preprocess_json(row.get('info_seed', '{}'))
+            # info_results_json = preprocess_json(row.get('info_results', '{}'))
             results_json = preprocess_json(row.get('results', '{}'))
-            info_seed_json = preprocess_json(row.get('info_seed', '{}'))
-            info_results_json = preprocess_json(row.get('info_results', '{}'))
-
             user_data = extract_data_from_json(results_json)
-            location_data = extract_data_from_json(info_seed_json)
-            additional_data = extract_data_from_json(info_results_json)
+
+            print("Results JSON:", results_json)
+            # print("Info Seed JSON:", info_seed_json)
+            # print("Info Results JSON:", info_results_json)
+
+            # user_data = extract_data_from_json(results_json)
+            # location_data = extract_data_from_json(info_seed_json)
+            # additional_data = extract_data_from_json(info_results_json)
             user = Users(
                 gender=user_data.get('gender', None),
                 name=user_data.get('name', {}).get('title', None),
@@ -70,26 +76,39 @@ def main():
                 date_of_birth=user_data.get('dob', {}).get('date', None)             
                 )
             data_insert_users.append(user)
+            # user = Users(
+            #     gender=user_data.get('gender', None),
+            #     name=user_data.get('name', {}).get('title', None),
+            #     first=user_data.get('name', {}).get('first', None),
+            #     last=user_data.get('name', {}).get('last', None),
+            #     date_of_birth=user_data.get('dob', {}).get('date', None)
+            # )
+            # data_insert_users.append(user)
 
-            if 'location' in location_data:
-                location = Locations(
-                    city=location_data['location'].get('city', None),
-                    state=location_data['location'].get('state', None),
-                    country=location_data['location'].get('country', None),
-                    postcode=location_data['location'].get('postcode', None),
-                    country_code=location_data['location'].get('country_code', None),
+            location_data = user_data.get('location', {})
+            location = Locations(
+                city=location_data.get('city', None),
+                state=location_data.get('state', None),
+                country=location_data.get('country', None),
+                postcode=location_data.get('postcode', None),
+                country_code=location_data.get('country_code', None)
                 )
-                data_insert_locations.append(location)
+            location.user = user
+            data_insert_locations.append(location)
 
-            phone = None
-            if isinstance(additional_data, dict) and 'phone' in additional_data:
-                phone_value = additional_data['phone']
-                if isinstance(phone_value, (int, str)):
-                    phone = str(phone_value)
-                else:
-                    print(f"Invalid 'phone' data: {phone_value}")
-            else:
-                print("No 'phone' data found in additional_data")
+            additional_data = {
+                'phone': user_data.get('phone', None),
+                'email': user_data.get('email', None),
+                'picture_large': user_data.get('picture', {}).get('large', None)
+            }
+            additional = Additional(
+                phone=additional_data.get('phone', None),
+                email=additional_data.get('email', None),
+                picture_large=additional_data.get('picture_large', None)
+            )
+            additional.user = user
+            data_insert_additional.append(additional)
+
 
     # Connect with the db
     # get a sessions
@@ -102,16 +121,12 @@ def main():
     try:
         session.bulk_save_objects(data_insert_users)
         session.commit()
-        
-        for user in data_insert_users:
-            user_id_mapping[user] = user.id
-
+        user_id_mapping = {user.id: user for user in data_insert_users}
         for location in data_insert_locations:
-            location.user_id = user_id_mapping.get(location.user, None)
+            location.user_id = location.user.id
 
         for additional in data_insert_additional:
-            additional.user_id = user_id_mapping.get(additional.user, None)
-
+            additional.user_id = additional.user.id
         session.bulk_save_objects(data_insert_locations)
         session.bulk_save_objects(data_insert_additional)
 
