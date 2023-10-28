@@ -20,7 +20,7 @@ def get_file_path():
     # return filepath
     filename ='/opt/airflow/dags/scripts/random_user.csv'
     # filename ='/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/scripts/random_user.csv'
-    print("Debug file path is: ",filename)
+    # print("Debug file path is: ",filename)
     return filename
     
 def main():
@@ -37,7 +37,7 @@ def main():
     # insert these object in the array and then into our data warehouse
     with open(filename, encoding='utf-8') as csvf:
         csv_reader = csv.DictReader(csvf)
-        print("Debug csv reader", csv_reader)
+        # print("Debug csv reader", csv_reader)
         for row in csv_reader:
             user_data = {
                 'Gender': row.get('Gender', None),
