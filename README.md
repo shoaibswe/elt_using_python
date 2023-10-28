@@ -204,15 +204,74 @@ Create some basic analytics by querying the tables in `raw` schema.
 #### Tasks
 
 1. Calculate age of each person utill current data from dob. 
-  > write you sql query here
-2. Count population based on country and then show how many in each state.
-  > write you sql query here
-3. Find out densely populated country
-  > write you sql query here
-4. What is the population count by age group in the increment of 10 upto 100?
-  > write you sql query here
-5. Chalenge here is to write your query in `metabase` software. Don't worry if you don't know how use `metabase` (you can skip this step). Post your metabase graph screenshot here.
+  >write you sql query here
+### Solution:
+  > QUERY:
+  SELECT usr.name "Title", usr.last as "Last Name", date_of_birth "DOB", 
+       EXTRACT(YEAR FROM AGE(date_of_birth)) AS "AGE"
+  FROM raw.users usr;
 
+ RESULT:
+![Alt text](image-6.png)
+
+2. Count population based on country and then show how many in each state.
+  >write you sql query here:
+  ### Solution:
+  >Query:
+  SELECT country, state, COUNT(1) AS population_count
+FROM raw.locations
+GROUP BY 1, 2
+ORDER BY 1,2;
+
+RESULT:
+![Alt text](image-7.png)
+3. Find out densely populated country
+  >write you sql query here
+  ### Solution:
+>QUERY:
+  RESULT:
+  SELECT country, COUNT(1) AS population_count
+FROM raw.locations
+GROUP BY country
+ORDER BY population_count DESC
+LIMIT 1;
+
+RESULT:
+![Alt text](image-8.png)
+
+4. What is the population count by age group in the increment of 10 upto 100?
+  >write you sql query here
+  ### Solution:
+>QUERY:
+  WITH age_data as ( 
+SELECT EXTRACT(YEAR FROM AGE(date_of_birth)) AS age
+  FROM raw.users)
+SELECT
+  CASE
+    WHEN age BETWEEN 0 AND 9 THEN '0-9'
+    WHEN age BETWEEN 10 AND 19 THEN '10-19'
+    WHEN age BETWEEN 20 AND 29 THEN '20-29'
+    WHEN age BETWEEN 30 AND 39 THEN '30-39'
+    WHEN age BETWEEN 40 AND 49 THEN '40-49'
+    WHEN age BETWEEN 50 AND 59 THEN '50-59'
+    WHEN age BETWEEN 60 AND 69 THEN '60-69'
+    WHEN age BETWEEN 70 AND 79 THEN '70-79'
+    WHEN age BETWEEN 80 AND 89 THEN '80-89'
+    WHEN age BETWEEN 90 AND 99 THEN '90-99'
+    ELSE '100+'
+  END AS "Age Group",
+  COUNT(*) AS "Population Count"
+from age_data
+GROUP BY 1
+ORDER BY 1;
+
+RESULT:
+![Alt text](image-9.png)
+
+5. Chalenge here is to write your query in `metabase` software. Don't worry if you don't know how use `metabase` (you can skip this step). Post your metabase graph screenshot here.
+>![Alt text](image-12.png)
+# Dashboard:
+![Alt text](image-13.png)
 # References
 
 1. https://airflow.apache.org/docs/apache-airflow/stable/howto/operator/bash.html
