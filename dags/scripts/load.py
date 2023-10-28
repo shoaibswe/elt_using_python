@@ -1,12 +1,10 @@
-import os
 import csv
 import sys
 sys.path.insert(0,'/opt/airflow/dags/scripts')
-import json
+# sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/scripts')
+import uuid
 
 from model import Connection, Users, Locations, Additional
-# import sys
-# sys.path.insert(0,'/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/')
 from config import DB_CONNECTION_STRING_WAREHOUSE 
 
 from sqlalchemy.orm import sessionmaker
@@ -21,29 +19,15 @@ def get_file_path():
     # filepath = os.path.join(os.getcwd(), filename)
     # return filepath
     filename ='/opt/airflow/dags/scripts/random_user.csv'
+    # filename ='/Users/shuvo/Documents/doc/Take-Home-Assignment-main/dags/scripts/random_user.csv'
+    print("Debug file path is: ",filename)
     return filename
-
-def preprocess_json(json_str):
-    last_closing_brace = json_str.rfind('}')
-    if last_closing_brace != -1:
-        json_str = json_str[:last_closing_brace + 1]
-    json_str = json_str.replace("{}/[0],1,1,1.4", "")
-    return json_str
-
-def extract_data_from_json(json_str):
-    try:
-        data = json.loads(json_str)
-        return data
-    except json.JSONDecodeError as e:
-        print(f"JSON decoding error: {e}. Returning an empty dictionary.")
-        return {}
     
 def main():
     filename = get_file_path()
     data_insert_users = []
     data_insert_locations = []
     data_insert_additional = []
-    user_id_mapping = {}
 
     engine = create_engine(DB_CONNECTION_STRING_WAREHOUSE)
     Session = sessionmaker(bind=engine)
@@ -53,62 +37,64 @@ def main():
     # insert these object in the array and then into our data warehouse
     with open(filename, encoding='utf-8') as csvf:
         csv_reader = csv.DictReader(csvf)
-
+        print("Debug csv reader", csv_reader)
         for row in csv_reader:
-            # results_json = preprocess_json(row.get('results', '{}'))
-            # info_seed_json = preprocess_json(row.get('info_seed', '{}'))
-            # info_results_json = preprocess_json(row.get('info_results', '{}'))
-            results_json = preprocess_json(row.get('results', '{}'))
-            user_data = extract_data_from_json(results_json)
-
-            print("Results JSON:", results_json)
-            # print("Info Seed JSON:", info_seed_json)
-            # print("Info Results JSON:", info_results_json)
-
-            # user_data = extract_data_from_json(results_json)
-            # location_data = extract_data_from_json(info_seed_json)
-            # additional_data = extract_data_from_json(info_results_json)
+            user_data = {
+                'Gender': row.get('Gender', None),
+                'Name': {
+                    'Name': row.get('Name', None),
+                },
+                'First Name': {
+                    'First': row.get('First Name', None),
+                },
+                'Last Name': {
+                    'Last': row.get('Last Name', None),
+                },
+                'Date of Birth': row.get('Date of Birth', None),
+                'City': row.get('City', None),
+                'State': row.get('State', None),
+                'Country': row.get('Country', None),
+                'Postcode': row.get('Postcode', None),
+                'Country Code (nat)': row.get('Country Code (nat)', None),
+                'Phone': row.get('Phone', None),
+                'Email': row.get('Email', None),
+                'Picture Large': row.get('Picture Large', None)
+            }
+            
+            user_id = uuid.uuid4()
             user = Users(
-                gender=user_data.get('gender', None),
-                name=user_data.get('name', {}).get('title', None),
-                first=user_data.get('name', {}).get('first', None),
-                last=user_data.get('name', {}).get('last', None),
-                date_of_birth=user_data.get('dob', {}).get('date', None)             
-                )
+                id=user_id,
+                gender=user_data.get('Gender', None),
+                name=user_data.get('Name', {}).get('Name', None),
+                first=user_data.get('First Name', {}).get('First', None),
+                last=user_data.get('Last Name', {}).get('Last', None),
+                date_of_birth=user_data.get('Date of Birth', None)
+            )
             data_insert_users.append(user)
-            # user = Users(
-            #     gender=user_data.get('gender', None),
-            #     name=user_data.get('name', {}).get('title', None),
-            #     first=user_data.get('name', {}).get('first', None),
-            #     last=user_data.get('name', {}).get('last', None),
-            #     date_of_birth=user_data.get('dob', {}).get('date', None)
-            # )
-            # data_insert_users.append(user)
 
-            location_data = user_data.get('location', {})
-            location = Locations(
-                city=location_data.get('city', None),
-                state=location_data.get('state', None),
-                country=location_data.get('country', None),
-                postcode=location_data.get('postcode', None),
-                country_code=location_data.get('country_code', None)
-                )
+            location_data = {
+                'city': user_data.get('City', None),
+                'state': user_data.get('State', None),
+                'country': user_data.get('Country', None),
+                'postcode': user_data.get('Postcode', None),
+                'country_code': user_data.get('Country Code (nat)', None),
+                'user_id': user_id
+            }
+            location_id = uuid.uuid4()
+            location = Locations(id=location_id, **location_data)
             location.user = user
             data_insert_locations.append(location)
 
             additional_data = {
-                'phone': user_data.get('phone', None),
-                'email': user_data.get('email', None),
-                'picture_large': user_data.get('picture', {}).get('large', None)
+                'id': uuid.uuid4(),
+                'phone': user_data.get('Phone', None),
+                'email': user_data.get('Email', None),
+                'picture_large': user_data.get('Picture Large', None),
+                'user_id': user_id
             }
-            additional = Additional(
-                phone=additional_data.get('phone', None),
-                email=additional_data.get('email', None),
-                picture_large=additional_data.get('picture_large', None)
-            )
+            additional = Additional(**additional_data)
             additional.user = user
             data_insert_additional.append(additional)
-
 
     # Connect with the db
     # get a sessions
@@ -117,19 +103,19 @@ def main():
     # commit db
     # close db
     # write your code here
-
     try:
         session.bulk_save_objects(data_insert_users)
         session.commit()
-        user_id_mapping = {user.id: user for user in data_insert_users}
+
         for location in data_insert_locations:
             location.user_id = location.user.id
 
         for additional in data_insert_additional:
             additional.user_id = additional.user.id
+
         session.bulk_save_objects(data_insert_locations)
         session.bulk_save_objects(data_insert_additional)
-
+        session.commit()
         print("Data loaded successfully.")
     except Exception as e:
         print(f"Error loading data: {e}")

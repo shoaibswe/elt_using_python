@@ -21,11 +21,7 @@ def next_seed(seed):
     current_index= permutations.index(tuple(seed_list))
     next_index= (current_index+1)%len(permutations)
     next_permutation = list(permutations[next_index])
-
-    # next_seed = seed.copy()
-    # for x in range(len(seed)):
-    #     next_seed[x] = next_permutation[x]
-    # return next_seed
+    
     next_seed_list = list(seed)
     for x in range(len(seed)):
         next_seed_list[x] = next_permutation[x]
@@ -94,6 +90,7 @@ def transform_data(data_json):
             if isinstance(results, list) and len(results) > 0:
                 user_data = results[0]
                 gender = user_data['gender']
+                name = user_data['name']['title'] 
                 first_name = user_data['name']['first']
                 last_name = user_data['name']['last']
                 dob = user_data['dob']['date']
@@ -107,6 +104,7 @@ def transform_data(data_json):
                 picture_large = user_data['picture']['large']
                 user_data_dict = {
                     'Gender': gender,
+                    'Name' : name,
                     'First Name': first_name,
                     'Last Name': last_name,
                     'Date of Birth': dob,
@@ -118,18 +116,18 @@ def transform_data(data_json):
                     'Phone': phone,
                     'Email': email,
                     'Picture Large': picture_large
-                }  
+                }
                 user_data_list.append(user_data_dict)
 
-                if user_data_list:
-                    data_df = pd.DataFrame(user_data_list)
-                    return data_df             
-                # df = df.dropna()
-                # df = df.drop_duplicates()
-                # data_frames.append(df)
-                else:
-                    print("No valid data to transform")
-                    return None
+    if user_data_list:
+        df = pd.DataFrame(user_data_list)
+        df = df.dropna()
+        df = df.drop_duplicates()
+        return df
+    else:
+        print("No valid data to transform")
+        return None                
+    # data_frames.append(df)
         # pass
 
 
